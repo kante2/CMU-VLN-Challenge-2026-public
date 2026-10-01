@@ -1,154 +1,221 @@
-# 스마트모빌리티공학실험2 Final Project
+# CMU-VLN-Challenge
 
-## 1. 제출물 (GitHub repo)
+## Table of Contents
+[Introduction](#introduction)  
+[Objective](#objective)  
+[Task Specification](#task-specification)
 
-Repository 루트에 다음 파일을 저장합니다. iclass에는 URL 만 폼으로 제출. **Public repo 만 허용 (Private 금지).**
+[Setting Up](#setting-up)
+- [Challenge Scenes](#challenge-scenes)
+- [Challenge Questions](#challenge-questions)
+- [System](#system)
+- [Simulator](#simulator)
+- [Object-Referential Dataset](#object-referential-dataset-vla-3d)
 
-| 파일 | 누가 |
-|------|------|
-| `main.py` | 모든 학생 |
-| `train.py` | **모든 학생** (비ML 학생은 `main.py` 와 동일 내용 복붙해서 제출. ML 학생은 학습 로직) |
-| `report.md` | 모든 학생 |
-| `requirements.txt` | **표준 환경 외 패키지 사용 시만** (§2 참조) |
-| `model.*` (.pkl, .pt 등) | ML 사용 학생만 (학습된 가중치, 재현성 확보용) |
+[Real-Robot Challenge](#real-robot-challenge-2026)
+- [Real-Robot Data](#real-robot-data)
 
-> ⚠️ 참신성·일치성 채점은 **`report.md` + `train.py`** 를 기준으로 합니다 (`main.py` 아님).
-> 비ML 학생도 `train.py` 필수 — `main.py` 와 같은 내용을 그대로 두 번 제출하시면 됩니다.
+[Submission](#submission)
 
----
+[Evaluation](#evaluation)
+- [Question Types and Initial Scoring](#question-types-and-initial-scoring)
+- [Timing](#timing)
 
-## 2. 표준 실행 환경
+[Challenge FAQ](#challenge-faq)
 
-채점기는 다음 버전으로 실행합니다. **이 외 패키지 사용 시 `requirements.txt` 필수**.
+## Introduction
+The CMU Vision-Language-Navigation Challenge leverages computer vision and natural language understanding in navigation autonomy. The challenge aims at pushing the limit of embodied AI in real environments and on real robots - providing a robot platform and a working autonomy system to bring everybody's work a step closer to real-world deployment. The challenge provides a real-robot system equipped with a 3D lidar and a 360 camera. The system has base autonomy onboard that can estimate the sensor pose, analyze the terrain, avoid collisions, and navigate to waypoints. Teams will set up software on the robot's onboard computer to interface with the system and navigate the robot. For 2026, the challenge will be done in a custom simulation environment and move to the real-robot system in the second phase. 
 
-| 패키지 | 버전 |
-|--------|------|
-| Python | 3.12.3 |
-| numpy | 2.4.4 |
-| scipy | 1.17.1 (`scipy.io`, `scipy.optimize` 포함) |
-| pytorch | 2.8.0 |
-| scikit-learn | 1.8.0 |
-| matplotlib | 3.10.8 |
-| pandas | 2.3.x (보조) |
+To register for the challenge, please see our [Challenge Website](https://www.ai-meets-autonomy.com/cmu-vln-challenge).
 
-위 패키지만 쓰면 `requirements.txt` **불필요**. 다른 패키지 사용 시 `pip install -r requirements.txt` 를 사용해서 설치가 가능하도록 `requirements.txt` 를 작성.
 
----
+## Objective 
+Teams are expected to come up with a vision-language model that can take a natural language navigation query and navigate the vehicle system by generating a waypoint or path based on the query.
 
-## 3. 데이터
 
-채점에 쓰이는 `.mat` 파일은 다음 3개 변수를 담고 있습니다.
+## Task Specification
+In the challenge, teams are provided with a set of natural language questions/statements for scenes from Unity [1]. The team is responsible for developing software that processes the questions together with onboard data of the scene provided by the system. The questions/statements all contain a spatial reasoning component that requires semantic spatial understanding of the objects in the scene. The environment is initially unknown and the scene data is gathered by navigating to appropriate viewpoints and exploring the scene by sending waypoints to the system. 5 questions/statements are provided for each of 15 Unity scenes and 3 scenes are held out for test evaluation.
 
-| 변수 | 모양 | 의미 |
-|------|------|------|
-| `p`     | (2, N) | 정답 사용자 위치 (x, y) |
-| `d_hat` | (18, N) | 18개 기지국이 측정한 RTT |
-| `BS_positions`  | (2, 18) | 18개 기지국의 좌표 |
+The natural language questions are separated into three categories: numerical, object reference, and instruction following, which are further described below.
 
-전체 사용자 (UE) 는 **1000명**. 그 중 **700명 만 학생에게 제공**, 나머지 **300명** 은 조교가 hidden test set 으로 보유. 채점 시 채점기는 hidden 데이터로 학생 main.py 를 실행합니다 → 학생이 받은 데이터에만 over-fit 한 코드는 손해.
+**Numerical**
 
----
+Numerical questions asks about the quantity of an object that fits certain attributes or spatial relations. The response is expected to be an integer number.
 
-## 4. `main.py` 작성 규격
+Examples:
 
-```python
-import numpy as np
-import scipy.io as sio
+    How many blue chairs are between the table and the wall?
 
-def your_algorithm(d_hat[:, u], p_bs):
-    """
-    본인 알고리즘 작성(필요시 상단에 추가적인 함수 작성 가능)
-    """
-    return 측위결과
+    How many black trash cans are near the window? 
 
-def main():
-    # 1) 입력 데이터 로드 — 채점기가 같은 폴더에 .mat 파일 자동 배치
-    mat_path  = 'DH_FR1.mat'
-    
-    data = sio.loadmat(mat_path, squeeze_me=False)
-    BS_positions   = np.asarray(data['BS_positions'], dtype=float)     # (2, 18)
-    d_hat  = np.asarray(data['d_hat'], dtype=float)    # (18, num_user)
-    p      = np.asarray(data['p'], dtype=float)        # (2, num_user) — GT 위치
+**Object Reference**
 
-    # 2) 본인 알고리즘 — 사용자 수는 입력에서 동적으로 받기
-    num_user = d_hat.shape[1]
-    p_hat = np.zeros((2, num_user))
-    for u in range(num_user):
-        p_hat[:, u] = your_algorithm(d_hat[:, u], BS_positions)
+Object reference statements asks the system to find a certain object located in the scene that is referred to by spatial relations and/or attributes. The response is expected to be a bounding box around the object and there exists only one correct answer in the scene (the referred object is unique). The center point of the bounding box marker will be used as a waypoint to navigate the robot system.
 
-    # 3) 결과 반환 — numpy 배열, 모양 (2, num_user)
-    return p_hat
+Examples:
 
- if __name__ == "__main__":
-    main()
+    Find the potted plant on the kitchen island that is closest to the fridge.
+
+    Find the orange chair between the table and sink that is closest to the window.
+
+**Instruction-Following**
+
+Instruction following statements ask the system to take a certain path, using objects to specify the trajectory of the path. The response is expected to be a sequence of waypoints.
+
+Examples:
+
+    Take the path near the window to the fridge.
+
+    Avoid the path between the two tables and go near the blue trash can near the window.
+
+
+## Setting Up
+First, clone this repo and place it under your local folder.
+
+```
+git clone --recurse-submodules git@github.com:Yuxin916/CMU-VLN-Challenge-2026.git
 ```
 
-⭐ 터미널에서 python main.py 로 실행 가능하도록 작성
+### Challenge Scenes
+A total of 18 Unity scenes are used for the challenge. 15 scenes are provided for model development while 3 are held out for testing. The majority of these scenes are single rooms while a few are multi-room buildings.  A set of the training environment models can be downloaded from [here](https://drive.google.com/drive/folders/1nki_xoFKX1bYr8m7qiGRQelwnQ7EKVYc?usp=drive_link). For all of the 15 training scenes, we also provide a processed point cloud of the scene, object and region information including color and size attributes, and referential language statements (please see [Object-Referential Dataset](#object-referential-dataset-vla-3d) for more details). 
 
-### 규칙
+![image](figures/scenes.png)
 
-| 규칙 | 설명 |
-|------|------|
-| `main()` 함수 정의 | 채점기가 호출 |
-| ⭐ **결과 반환 = numpy 배열, 모양 `(2, num_user)`** | 첫 행 = x 좌표, 둘째 행 = y 좌표 |
-| ⭐ **사용자 수를 코드에 미리 박지 말기** | `num_user = d_hat.shape[1]` 로 입력에서 받기 |
-| **실행 시간 10분** 제한 | 그 안에 `main()` 이 안 끝나면 강제 종료 → **성능점수 최하점** |
-| 파일 이름은 `DH_FR1.mat` | 채점기가 이 이름으로 cwd 에 자동 배치 |
+### Challenge Questions
+A set of challenge questions for each Unity scene is provided in the pdf files for each of the 15 training scenes under the [questions](questions/) folder. Images of the correct answer in each scene are also provided for visualization purposes and a .ply file of the target trajectory is provided as well. All questions for all training scenes can also be found in JSON format under [questions/questions.json](questions/questions.json).
 
----
+### System
 
-## 5. `report.md` 작성 규칙
+Our system runs on Ubuntu 24.04 and uses ROS Jazzy in both simulation and onboard the real robot. Follow the instructions in the [docker/](docker/) folder to try the simulator by pulling the docker image provided and launching the system.
 
-### 5.1 필수 섹션 (이 4개만)
+The system uses Unity environments by default and has two parts:
+- The base navigation system is in the [autonomy_stack_mecanum_wheel_platform](https://github.com/Yuxin916/End2end-ObjectNav-Physical-Experiment/tree/81035e9e4190826b7458c711f08cb64f8f9e64ac) folder. This system can be launched by itself without the AI module running. For the base navigation system, you may change the scene used by placing it in the [autonomy_stack_mecanum_wheel_platform/src/base_autonomy/vehicle_simulator/mesh/unity/](https://github.com/Yuxin916/End2end-ObjectNav-Physical-Experiment/tree/81035e9e4190826b7458c711f08cb64f8f9e64ac/src/base_autonomy/vehicle_simulator/mesh/unity/) directory.
+- The vision-language model should be in the [ai_module](ai_module/) folder. The model currently in the folder under [ai_module/src](ai_module/src) is a "dummy model" that demonstrates how to read input questions and produces arbitrary examples of the different types of output responses which are to be used by the system and the evaluation node. **Teams are expected to come up with a model to replace this one.**
 
-1. **모티베이션 & 인트로** — 중간발표까지의 실험 결과·고찰 정리, 거기서 본 알고리즘 아이디어가 도출된 흐름, 알고리즘의 high-level 소개.
-2. **알고리즘 설명** — 어떻게 동작하는지 구체적으로 설명 (**말과 수식으로만**). **이 설명만 듣고 코드 구현이 가능해야 함.**
-3. **Agent AI(e.g., ChatGPT, Claude Code, Gemini 등) 활용 방안** — 어떤 Agent AI를 어떤 방식으로 활용하였는지 구체적으로 작성(AI와 본인의 역할 구분 필요).
-4. **결과 도출 & 디스커션** — 수치의 단순 비교 X. 본인의 사고와 구현이 적합했는가 / baseline과의 비교가 fair 한가 (예: 딥러닝 vs 단순 삼각측량 비교는 unfair) / 알고리즘의 장점·단점 / future work / 본인이 사용한 자체 평가 방식의 fairness.
-5. **Reference** — 참고한 논문이 있는 경우, 레퍼런스를 달고 해당 논문이 제안하는 부분과 본인이 제안하는 부분의 차이를 2번 파트에 명확히 기재.
+#### Dummy Model
 
+The dummy model will read a question as a ROS String message on the `/challenge_question` topic. The dummy model will then either publish an integer as an Int32 message, send bounding box visualization markers for object reference, or waypoints to guide vehicle navigation. The three types of messages are listed below. To integrate the a model with the system, please modify the system startup script.
+- Numerical response: ROS Int32 message on topic `/numerical_response`, containing an integer answering a numerical question.
+- Visualization marker: ROS Marker message on topic `/selected_object_marker`, containing object label and bounding box of the selected object.
+- Waypoint: ROS Pose2D message on topic `/way_point_with_heading` (neglect the heading for this year’s challenge).
 
-### 5.2 형식 제한 (엄격)
+#### System Outputs
+The system provides onboard data to the AI module as shown in the table below:
 
-| 제한 | 이유 |
-|------|------|
-| ❌ **코드 블록 (```...```) 금지** | 코드는 `main.py` 로 평가, 보고서는 자연어 설명 평가 |
-| ❌ **의사코드 (pseudocode) 금지** | 동일 이유 |
-| ❌ **이미지 (그림·플롯·스크린샷) 첨부 금지** | 채점 LLM 이 이미지를 참조하지 않음 |
-| ✅ **모든 결과 수치는 markdown 표로** | 표 형식이라야 자동 채점기가 정확히 파싱 |
-| ⚠️ **파일 크기 100 KB 제한** | `report.md` 가 100 KB 넘으면 채점에서 잘림 |
+| Message | Description | Frequency | Frame | ROS Topic Name |
+|-|-|-|-|-|
+| Image | ROS Image message from the 360 camera. The image is at 1920/640 resolution with 360 deg HFOV and 120 VFOV. | 10Hz | camera | `/camera/image` |
+| Registered Scan | ROS PointCloud2 message from the 3D lidar and registered by the state estimation module. | 5Hz | map | `/registered_scan` |
+| Sensor Scan | ROS PointCloud2 message from the 3D lidar. | 5Hz | sensor_at_scan | `/sensor_scan` |
+| Local Terrain Map | ROS PointCloud2 message from the terrain analysis module around the vehicle. | 5Hz | map | `/terrain_map` (5m around vehicle) <br> `/terrain_map_ext` (20m around vehicle) |
+| Sensor Pose| ROS Odometry message from the state estimation module. | 100-200Hz | from map to sensor | `/state_estimation` |
 
 
----
+**IMPORTANT NOTE**: While more topics may be available from the system, these are the only ones allowed to be used during test time. During training/development, you are free to use whatever information the system simulator provides. One thing is different that Traversable Area and Ground-truth Semantics will not be provided this year.
 
-## 6. 평가
+#### System Inputs
 
-채점은 다음 영역으로 나뉩니다.
+The system takes waypoints output from the AI module to navigate the robot. Waypoints located in the traversable area (listed above) are accepted directly, and waypoints out of the traversable area are adjusted and moved into the traversable area. The system also takes visualization markers output by the module to highlight selected objects. Int32 messages indicating a numerical response are not directly used by the system to navigate the robot, and are read instead by the evaluation node detailed in the [evaluation](#evaluation) section.
 
-| 영역 | 무엇 |
-|------|------|
-| 성능 | Hidden test set (300명) 으로 main.py 실행 결과 |
-| 참신성 | 본인 알고리즘과 다른 학생들 알고리즘 간 similarity 비교 (낮을수록 참신) |
-| 보고서 | 위 §5.1 의 4개 섹션을 종합 평가 |
+The table below lists the ROS topics to use. The waypoints should be used for Instruction-Following questions, the visualization marker should be the output for the Object Reference questions, and the integers for Numerical questions.
 
-세부 가중치·임계값은 비공개.
+| Message | Description | ROS Topic Name |
+|-|-|-|
+| Waypoint with Heading | ROS Pose2D message with position and orientation. | `/way_point_with_heading` |
+| Selected Object Marker | ROS Marker message containing object label and bounding box of the selected object. | `/selected_object_marker` |
+| Numerical Response | ROS Int32 message with an integer as an answer to a numerical question. | `/numerical_response` |
 
----
+The coordinate frames used by the physical system are shown below. The camera position (camera frame) with respect to the lidar (sensor frame) is measured based on a CAD model. The orientation is calibrated and the images are remapped to keep the camera frame and lidar frame aligned. 
 
-## 7. 마감
+<p align="center">
+  <img src="figures/system.png" alt="system" width="30%"/>
+</p>
 
-- **1차 제출 마감**: **2026년 6월 4일 (목) 자정**
-- **2차 제출 마감**: **2026년 6월 7일 (일) 자정**
 
----
+### Object-Referential Dataset (VLA-3D)
 
-## 8. 질문 관련
-- 모든 질문은 조교 이메일을 통해서 해주시고, 들어오는 질문들에 대해 README.md 파일을 업데이트 할 예정입니다.
-- 1분반 - sanghyeok.kim@inha.edu
-- 2분반 - kimjaehong@inha.edu
-- jh.koo@inha.edu
+To help with the subtask of referential object-grounding, the VLA-3D dataset containing 7.6K indoor 3D scenes with over 11K regions and 9M+ statements is provided. The dataset includes processed scene point clouds, object and region labels, a scene graph of semantic relations, and generated language statements for each 3D scene from a diverse set of data sources and includes the 15 training scenes in Unity. For access to the data and more details on the format, please see our [VLA-3D repository](https://github.com/HaochenZ11/VLA-3D).
 
----
+## Real-Robot Challenge (2026)
 
-## 9. 수정사항
-- main.py 함수 예시 오류 수정 (260526)
+Starting in 2025, the final round of challenge evaluation will be done on the real-robot system while initial evaluation rounds are still done in simulation. Similar to the simulator, the system provides onboard data as described below and takes waypoints in the same way as the simulator. The software developed in the AI module is only able to send waypoints to explore the scene. Manually sending waypoints or teleoperation is not allowed. During the final evaluation phase, each team will remotely login to the robot's onboard computer (16x i9 CPU cores, 32GB RAM, RTX 4090 GPU), and set up software in a Docker container that interfaces with the autonomy modules. The Docker container is used by each team alone and not shared with other teams. We will schedule time slots for teams who pass the simulation round to set up the software and test the robot during that phase. The teams can also record data on the robot's onboard computer and this data will be made available to participants afterwards.
+
+### Real-Robot Data
+
+Example scene data collected from the real system is provided [here](https://drive.google.com/drive/folders/1xaatyLeIKLTh_oRzkyd7F1G6tkRPbFtm?usp=sharing) with some differences in the object layout. The following can be found in the sample data:
+
+- `data_view.rviz2`: An RVIZ configuration file provided for viewing the data
+- `system_ros2.zip`: Zipped bagfile with ROS messages provided by the system in the same format as during the challenge
+
+Here, the ground truth map and the object list are not provided files during the challenge but shown as a sample of what information can be obtained and processed from the system. The camera pose (camera frame) with respect to the lidar (sensor frame) can be found in the README file included. Further details about the files can be found in the README text file as well.
+
+
+## Submission
+Submissions will be made as a github repository link to a public repository. The easiest way would be to fork this repository and make changes there, as the repository submitted will need to be structured in the same way. The only files/folders that should be changed are what's under [ai_module](ai_module/). If changes were made to the docker image to install packages, push the updated image to [Docker Hub](https://hub.docker.com/) and submit the link to the image as well.
+
+Prior to submitting, please download the docker image and test it with the simulator as the submission will be evaluated in the same way. Please also make sure that waypoints and visualization markers sent match the types in the example dummy model and are on the same ROS topics so that the base navigation system can correctly receive them.
+
+Please fill out the [Submission Form](https://docs.google.com/forms/d/e/1FAIpQLScdZAcw5S2nbfSKn8qB-kmNC3PEEQHTK64dU9Hqb5iKg0_jtA/viewform) with a link to your Github repo.
+
+
+## Evaluation
+The submitted code will be pulled and evaluated with 3 Unity environment models which have been held from the released data. Each scene will be unknown and the module has a set amount of time to explore and answer the question (see [timing](#timing) for more details). The test scenes are of similar style to the provided training scenes. **The system will be relaunched for each language command tested such that information collected from previously exploring the scene is not retained.** Note that the information onboard the system that is allowed to be used at test time is limited to what is listed in [System Outputs](#system-outputs).
+
+Evaluation is performed by a `challenge_evaluation_node` whose source code is not made public. The evaluation node will be started along with the team-provided AI module and the system at the same time, and publishes a single question each startup as a ROS String message on the following topic at a rate of 1Hz:
+
+| Message | Description | Frequency | ROS Topic Name |
+|-|-|-|-|
+| Challenge Question | ROS String message with detailed question to solve. | 1Hz | `/challenge_question` |
+
+### Question Types and Initial Scoring
+
+For each scene, 5 questions similar to those provided will be tested and a score will be given to each response. The question types will be scored as follows:
+- **Numerical** (/1): Exact number must be published on `/numerical_response` as an `std_msgs/msg/Int32` message. Score of 0 or 1.
+- **Object Reference** (/2): ROS `visualization_msgs/msg/Marker` message must be published on `/selected_object_marker`, and is scored based on its degree of overlap with the ground truth object bounding box. Score between 0 and 2.
+- **Instruction-Following** (/6): A series of `geometry_msgs/msg/Pose2D` waypoints must be published on `/way_point_with_heading` to guide the vehicle. The score will be calculated based on the actual trajectory followed by the robot based on whether it follows the path constraints in the command and in the correct order. Penalties are imposed upon the score if the followed path deviates from the correct order of constraints, does not achieve the desired constraints, or passes through areas it is forbidden to go through in the command. Score between 0 and 6, with possibility for partial points. 
+
+The scores from all questions across the 3 test scenes will be totaled for each team's final score. 
+
+
+### Timing
+
+For each question, both re-exploration on system launch and question answering will be timed. Timing will begin immediately at system startup. Each question has a total time limit of **10 minutes** for exploration and question answering combined, regardless of the test scene. Exceeding the time limit for a certain question incurs a penalty on the initial score calculated for the question. Finishing before the allotted time for a question earns bonus points on that question, which will be used to break ties between teams with similar initial scores.
+
+
+## Challenge FAQ
+Any questions regarding the challenge can be asked by opening a Github issue with the "question" label. We encourage you to use this feature so that multiple members of the team can see the question. Questions specific to your team situation can be emailed to jingfant@andrew.cmu.edu or other challenge organizers. Frequently asked questions will be posted here.
+
+1. Are multiple submissions allowed?
+
+    Yes, there is no limit to the number of submissions allowed during the competition. The submission form is set up to allow multiple submissions and we will take your highest scoring one.
+
+2. What are the time constraints for completing the task?
+
+    Please check the [timing](#timing) section.
+
+3. Any restrictions on the usage of LLMs/VLMs/APIs?
+
+    There are no restrictions on using LLMs, VLMs, or online APIs. Any model can be used, however, keep in mind that we will need to be able to run your code and if it needs to query online APIs during runtime, you will have to provide your access token in your code.
+
+4. What is the docker size limit?
+
+    The size limitation depends on the machine we use to run evaluation. The specs for the machine can be found [HERE](https://simplynuc.com/product/nuc13rngi9-full/?gad_source=1&gclid=CjwKCAjwiaa2BhAiE[%E2%80%A6]g4P7AnhLOZQVIoVC9croO7-i74DfuezIOztALzi5RVJ3jv3bxoCxmEQAvD_BwE).
+
+5. How will real-robot evaluation work?
+   
+   All submissions will first be evaluated in simulation first. Valid submissions will then be evaluated on the real-robot system and teams will be invited to schedule a timeslot and connect remotely to assist with the integration and evaluation.
+
+6. Will ground-truth semantics be provided in the simulation and real-robot evaluation?
+
+   No, we are sorry that this year we will not provide ground-truth semantics in both phases.
+
+7. How will presentation at the IROS workshop work?
+
+   All evaluation will be conducted prior to the IROS conference. The top 3 teams will be contacted with the opportunity to present their method either in-person or remotely.
+
+## Acknowledgements
+Thank you to [AlphaZ](https://alpha-z.ai/) for sponsoring the challenge for 2026! Their generous support enables us to provide the top three teams with a cash prize.
+
+## References
+
+[1] J. Haas. "A history of the unity game engine," in Diss. Worcester Polytechnic Institute, vol. 483, no. 2014, pp. 484, 2014.
