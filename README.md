@@ -20,11 +20,11 @@
 
 ## Team TMAH
 
-| Name | English Name | Affiliation |
-|---|---|---|
-| 이강태 | Kangtae Lee | Inha University |
-| 박재일 | Jaeil Park | Inha University |
-| 하재민 | Jaemin Ha | DGIST |
+| Name | English Name | Role | Affiliation |
+|---|---|---|---|
+| 이강태 | Kangtae Lee | Team Leader | Inha University |
+| 박재일 | Jaeil Park | Team Member | Inha University |
+| 하재민 | Jaemin Ha | Team Member | DGIST |
 
 ---
 
