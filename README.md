@@ -1,3 +1,47 @@
+# 🏆 CMU Vision-Language-Navigation Challenge 2026 — 3rd Place
+
+**Team TMAH** · IROS 2026 · Carnegie Mellon University Robotics Institute
+
+<p align="center">
+  <img src="figures/certificate.png" width="640" alt="Certificate of Achievement, 3rd Place, Team TMAH">
+</p>
+
+> Awarded a Certificate of Achievement by the challenge organizers, Wenshan Wang and Ji Zhang (CMU Robotics Institute).
+
+## Result
+
+| Item | Detail |
+|---|---|
+| Challenge | CMU Vision-Language-Navigation Challenge 2026 |
+| Team | TMAH |
+| Final rank | **3rd place** |
+| Phase 1 (simulation) | Ranked 3rd, advanced to Phase 2 |
+| Phase 2 (real robot) | Evaluated on the organizers' real-robot system |
+| Presentation | <!-- TODO: IROS 2026 workshop, 발표 방식(현장/원격), 날짜, 장소 --> |
+
+## Team TMAH
+
+| Name | Affiliation | Role | Links |
+|---|---|---|---|
+| Kante (이강태) | Inha University | <!-- TODO: 담당 역할 --> | [GitHub](https://github.com/kante2) |
+| <!-- TODO --> | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
+| <!-- TODO --> | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
+| <!-- TODO --> | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
+
+## Our Approach
+
+We built a three-mission system (numerical counting, object reference, instruction following) on a shared grounding pipeline:
+
+`YOLO-World → Gemini → SAM2 → LiDAR grounding`
+
+> **Note:** The core implementation used in the competition is kept in a private repository and is not included here.
+
+---
+
+*The original challenge README follows below. This repository is based on the official [CMU-VLN-Challenge-2026](https://github.com/Yuxin916/CMU-VLN-Challenge-2026) repository.*
+
+---
+
 # CMU-VLN-Challenge
 
 ## Table of Contents
