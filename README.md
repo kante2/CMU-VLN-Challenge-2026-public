@@ -1,37 +1,3 @@
-# 🏆 CMU Vision-Language-Navigation Challenge 2026 — 3rd Place
-
-**Team TMAH** · IROS 2026 · Carnegie Mellon University Robotics Institute
-
-<p align="center">
-  <img src="figures/certificate.png" width="640" alt="Certificate of Achievement, 3rd Place, Team TMAH">
-</p>
-
-> Awarded a Certificate of Achievement by the challenge organizers, Wenshan Wang and Ji Zhang (CMU Robotics Institute).
-
-## Result
-
-| Item | Detail |
-|---|---|
-| Challenge | CMU Vision-Language-Navigation Challenge 2026 |
-| Team | TMAH |
-| Final rank | **3rd place** |
-| Phase 1 (simulation) | Ranked 3rd, advanced to Phase 2 |
-| Phase 2 (real robot) | Evaluated on the organizers' real-robot system |
-
-## Team TMAH
-
-| Name | English Name | Role | Affiliation |
-|---|---|---|---|
-| 이강태 | Kangtae Lee | Team Leader | Inha University |
-| 박재일 | Jaeil Park | Team Member | Inha University |
-| 하재민 | Jaemin Ha | Team Member | DGIST |
-
----
-
-*The original challenge README follows below. This repository is based on the official [CMU-VLN-Challenge-2026](https://github.com/Yuxin916/CMU-VLN-Challenge-2026) repository.*
-
----
-
 # CMU-VLN-Challenge
 
 ## Table of Contents
