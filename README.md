@@ -17,24 +17,14 @@
 | Final rank | **3rd place** |
 | Phase 1 (simulation) | Ranked 3rd, advanced to Phase 2 |
 | Phase 2 (real robot) | Evaluated on the organizers' real-robot system |
-| Presentation | <!-- TODO: IROS 2026 workshop, 발표 방식(현장/원격), 날짜, 장소 --> |
 
 ## Team TMAH
 
-| Name | Affiliation | Role | Links |
-|---|---|---|---|
-| Kante (이강태) | Inha University | <!-- TODO: 담당 역할 --> | [GitHub](https://github.com/kante2) |
-| <!-- TODO --> | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
-| <!-- TODO --> | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
-| <!-- TODO --> | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
-
-## Our Approach
-
-We built a three-mission system (numerical counting, object reference, instruction following) on a shared grounding pipeline:
-
-`YOLO-World → Gemini → SAM2 → LiDAR grounding`
-
-> **Note:** The core implementation used in the competition is kept in a private repository and is not included here.
+| Name | English Name | Affiliation |
+|---|---|---|
+| 이강태 | Kangtae Lee | Inha University |
+| 박재일 | Jaeil Park | Inha University |
+| 하재민 | Jaemin Ha | DGIST |
 
 ---
 
