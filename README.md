@@ -18,6 +18,16 @@
 | Phase 1 (simulation) | Ranked 3rd, advanced to Phase 2 |
 | Phase 2 (real robot) | Evaluated on the organizers' real-robot system |
 
+## Demo Video
+
+<p align="center">
+  <a href="media/Video_final.mp4">
+    <img src="figures/video_thumbnail.png" width="640" alt="Team TMAH demo video (click to play)">
+  </a>
+</p>
+
+<p align="center"><a href="media/Video_final.mp4">▶ Watch the video</a></p>
+
 ## Team TMAH
 
 | Name | English Name | Role | Affiliation |
